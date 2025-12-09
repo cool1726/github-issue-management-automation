@@ -1,0 +1,24 @@
+---
+alwaysApply: true
+---
+
+# CrewAI 프로젝트 - Cursor Rules
+
+## 프로젝트 개요
+이 프로젝트는 CrewAI 프레임워크를 사용하여 멀티 에이전트 시스템을 구축하는 프로젝트입니다.
+
+## 패키지 관리
+이 프로젝트는 **uv**를 사용하여 패키지를 관리합니다. `pyproject.toml` 파일에 의존성이 정의되어 있으며, PEP 621 표준 형식을 따릅니다.
+
+## 규칙 파일 구조
+이 프로젝트의 규칙은 다음과 같이 분류되어 있습니다:
+
+- **project-structure.mdc**: 프로젝트 구조 및 파일 역할
+- **crewai-patterns.mdc**: CrewAI 프레임워크 패턴 (Agent, Task, Crew)
+- **yaml-config.mdc**: YAML 설정 파일 사용 규칙
+- **custom-tools.mdc**: 커스텀 툴 개발 가이드
+- **llm-config.mdc**: LLM 설정
+- **code-style.mdc**: 코드 스타일 및 가이드라인
+- **cli-config.mdc**: CrewAI CLI 설정 및 사용 가이드
+
+각 규칙 파일은 해당 주제에 대한 상세한 가이드를 제공합니다.

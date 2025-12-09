@@ -1,0 +1,161 @@
+---
+alwaysApply: true
+---
+
+# CrewAI CLI 설정 및 사용 가이드
+
+## CLI 개요
+
+CrewAI CLI는 CrewAI와 상호작용하기 위한 명령줄 도구로, crew 및 flow를 생성, 학습, 실행, 관리할 수 있는 명령어 세트를 제공합니다.
+
+## 설치
+
+```bash
+pip install crewai
+```
+
+## 기본 사용법
+
+```bash
+crewai [COMMAND] [OPTIONS] [ARGUMENTS]
+```
+
+## 주요 명령어
+
+### 1. Create
+
+새로운 crew 또는 flow를 생성합니다.
+
+```bash
+crewai create crew my_new_crew
+crewai create flow my_new_flow
+```
+
+### 2. Run
+
+crew 또는 flow를 실행합니다.
+
+```bash
+crewai run
+```
+
+**참고**: CrewAI 프로젝트가 설정된 디렉토리에서 실행해야 합니다.
+
+### 3. Chat
+
+crew와 대화형 세션을 시작합니다.
+
+```bash
+crewai chat
+```
+
+**중요**: `crew.py` 파일에 `chat_llm` 속성을 설정해야 합니다:
+
+```python
+@crew
+def crew(self) -> Crew:
+    return Crew(
+        agents=self.agents,
+        tasks=self.tasks,
+        process=Process.sequential,
+        verbose=True,
+        chat_llm="gpt-4o",  # 채팅 오케스트레이션용 LLM
+    )
+```
+
+### 4. Train
+
+crew를 학습시킵니다.
+
+```bash
+crewai train -n 10 -f my_training_data.pkl
+```
+
+- `-n, --n_iterations`: 학습할 반복 횟수 (기본값: 5)
+- `-f, --filename`: 학습 파일 경로 (기본값: "trained_agents_data.pkl")
+
+### 5. Test
+
+crew를 테스트합니다.
+
+```bash
+crewai test -n 5 -m gpt-3.5-turbo
+```
+
+- `-n, --n_iterations`: 테스트할 반복 횟수 (기본값: 3)
+- `-m, --model`: 사용할 LLM 모델 (기본값: "gpt-4o-mini")
+
+### 6. Login
+
+CrewAI AOP에 인증합니다.
+
+```bash
+crewai login
+```
+
+**경고**: 버전 0.140.0부터 인증 흐름이 업데이트되었습니다. Google 로그인 사용자 또는 2025년 7월 3일 이후 계정 생성자는 이전 버전의 `crewai` 라이브러리로 로그인할 수 없습니다.
+
+### 7. Deploy
+
+crew 또는 flow를 CrewAI AOP에 배포합니다.
+
+```bash
+crewai login                    # 먼저 인증
+crewai deploy create           # 배포 생성
+crewai deploy push             # 배포 실행
+crewai deploy status           # 배포 상태 확인
+crewai deploy logs             # 배포 로그 확인
+crewai deploy list             # 배포 목록
+crewai deploy remove           # 배포 삭제
+```
+
+### 8. Config
+
+CLI 설정을 관리합니다.
+
+```bash
+crewai config list                                    # 현재 설정 표시
+crewai config set enterprise_base_url <url>          # Enterprise URL 설정
+crewai config set oauth2_provider <provider>         # OAuth2 제공자 설정
+crewai config reset                                  # 모든 설정 초기화
+```
+
+**사용 가능한 설정 매개변수**:
+- `enterprise_base_url`: CrewAI AOP 인스턴스의 기본 URL
+- `oauth2_provider`: OAuth2 제공자 (workos, okta, auth0 등)
+- `oauth2_audience`: OAuth2 audience 값
+- `oauth2_client_id`: OAuth2 클라이언트 ID
+- `oauth2_domain`: OAuth2 제공자 도메인
+
+### 9. Traces
+
+추적 수집을 관리합니다.
+
+```bash
+crewai traces enable    # 추적 활성화
+crewai traces disable   # 추적 비활성화
+crewai traces status    # 추적 상태 확인
+```
+
+**추적 우선순위**:
+1. 코드의 `tracing` 플래그 (최우선)
+2. 환경 변수 `CREWAI_TRACING_ENABLED=true`
+3. 사용자 기본 설정 (`crewai traces enable`)
+
+### 10. 기타 명령어
+
+```bash
+crewai version                    # 버전 확인
+crewai replay -t task_123456     # 특정 task부터 재생
+crewai log-tasks-outputs         # 최신 task 출력 확인
+crewai reset-memories --all       # 메모리 초기화
+crewai org list                  # 조직 목록
+crewai org current               # 현재 조직 확인
+crewai org switch <org_id>       # 조직 전환
+```
+
+## 주의사항
+
+- 대부분의 명령어는 CrewAI 프로젝트가 설정된 디렉토리에서 실행해야 합니다
+- 배포 관련 명령어는 CrewAI AOP 인증이 필요합니다
+- 버전 0.140.0 이후 Google 로그인 사용자 또는 2025년 7월 3일 이후 계정 생성자는 이전 버전의 `crewai` 라이브러리로 로그인할 수 없습니다

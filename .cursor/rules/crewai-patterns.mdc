@@ -1,0 +1,103 @@
+---
+alwaysApply: true
+---
+
+# CrewAI 프레임워크 패턴
+
+## Agent 정의 패턴
+
+### 기본 구조
+- `@agent` 데코레이터를 사용하여 Agent 메서드 정의
+- `agents.yaml`에서 설정을 로드하여 사용 (`self.agents_config`)
+- Agent 인스턴스 반환
+
+### Agent 속성
+- `config`: YAML에서 로드한 설정 (`self.agents_config["agent_name"]`)
+- `tools`: 사용할 커스텀 툴 리스트 (필요시)
+- `apps`: CrewAI 앱 통합 리스트 (예: "github/get_issue_by_number", "web/search")
+- `llm`: LLM 설정 (Azure GPT-4.1 사용)
+- `reasoning`: 추론 모드 활성화 여부 (기본값: False)
+- `max_iter`: 최대 반복 횟수 (기본값: 25)
+- `allow_delegation`: 위임 허용 여부 (기본값: False)
+- `inject_date`: 날짜 주입 여부 (기본값: True)
+
+### 예시 패턴
+```python
+@agent
+def researcher(self) -> Agent:
+    return Agent(
+        config=self.agents_config["researcher"],
+        tools=[],
+        reasoning=False,
+        max_iter=25,
+        allow_delegation=False,
+        apps=["web/search"],
+        llm=LLM(model="azure/gpt-4.1", temperature=0.7),
+    )
+```
+
+## Task 정의 패턴
+
+### 기본 구조
+- `@task` 데코레이터를 사용하여 Task 메서드 정의
+- `tasks.yaml`에서 설정을 로드하여 사용 (`self.tasks_config`)
+- Task 인스턴스 반환
+
+### Task 속성
+- `config`: YAML에서 로드한 설정 (`self.tasks_config["task_name"]`)
+- `markdown`: 마크다운 형식 출력 여부 (기본값: False)
+- `context`: 다른 Task의 결과를 참조하는 배열 (의존성 정의)
+
+### 예시 패턴
+```python
+@task
+def research(self) -> Task:
+    return Task(
+        config=self.tasks_config["research"],
+        markdown=False,
+    )
+```
+
+## Crew 구성 패턴
+
+### 기본 구조
+- `@crew` 데코레이터를 사용하여 Crew 메서드 정의
+- `agents`와 `tasks`는 데코레이터에 의해 자동 생성됨
+- Crew 인스턴스 반환
+
+### Crew 속성
+- `agents`: `self.agents` (자동 생성)
+- `tasks`: `self.tasks` (자동 생성)
+- `process`: 실행 프로세스 타입 (`Process.sequential` 사용)
+- `verbose`: 상세 로그 출력 여부 (기본값: True)
+
+### 예시 패턴
+```python
+@crew
+def crew(self) -> Crew:
+    return Crew(
+        agents=self.agents,
+        tasks=self.tasks,
+        process=Process.sequential,
+        verbose=True,
+    )
+```
+
+## 확장 시 고려사항
+
+### 새로운 Agent 추가
+1. `config/agents.yaml`에 Agent 설정 추가
+2. `crew.py`에 `@agent` 데코레이터가 붙은 메서드 추가
+3. 필요한 `apps` 또는 `tools` 지정
+4. LLM 설정 및 기타 속성 구성
+
+### 새로운 Task 추가
+1. `config/tasks.yaml`에 Task 설정 추가
+2. `crew.py`에 `@task` 데코레이터가 붙은 메서드 추가
+3. 필요한 `context` 의존성 정의 (다른 Task 참조)
+4. `markdown` 옵션 설정
+
+### Task 순서
+- Crew는 sequential 프로세스이므로 Task 순서가 중요함
+- `context` 배열로 Task 간 의존성 명시
+- 의존하는 Task가 먼저 실행되도록 순서 조정

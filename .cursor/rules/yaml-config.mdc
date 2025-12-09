@@ -1,0 +1,91 @@
+---
+alwaysApply: true
+---
+
+# YAML 설정 파일 사용 규칙
+
+## agents.yaml 구조
+
+### 필수 필드
+- `role`: Agent의 역할 (예: "Researcher", "Analyst")
+- `goal`: Agent의 목표 (예: "Research and analyze information...")
+- `backstory`: Agent의 배경 스토리 및 전문성 설명
+
+### 템플릿 변수 사용
+- 중괄호로 감싼 변수 사용: `{variable_name}`
+- 사용 가능한 변수:
+  - `{project_name}`: 프로젝트 이름
+  - `{domain}`: 도메인 영역
+  - `{expertise_areas}`: 전문 분야
+  - 기타 `main.py`의 `inputs`에 정의된 변수
+
+### 예시
+```yaml
+researcher:
+  role: Researcher
+  goal: Research and analyze information about {project_name} in the {domain} domain
+    to gather comprehensive insights and identify key patterns.
+  backstory: You are an experienced researcher with deep expertise in {expertise_areas}...
+```
+
+## tasks.yaml 구조
+
+### 필수 필드
+- `description`: Task의 상세 설명 및 수행할 작업 내용
+- `expected_output`: Task의 예상 출력 형식 및 내용
+- `agent`: Task를 수행할 Agent 이름 (agents.yaml의 키와 일치)
+
+### 선택 필드
+- `context`: 다른 Task의 결과를 참조하는 배열 (의존성 정의)
+  - 배열에 Task 이름을 문자열로 나열
+  - 참조된 Task가 먼저 실행됨
+
+### 템플릿 변수 사용
+- 중괄호로 감싼 변수 사용: `{variable_name}`
+- 사용 가능한 변수:
+  - `{input_data}`: 입력 데이터
+  - `{project_name}`: 프로젝트 이름
+  - `{domain}`: 도메인 영역
+  - `{team_members}`: 팀 멤버 목록
+  - 기타 `main.py`의 `inputs`에 정의된 변수
+
+### 예시
+```yaml
+research_task:
+  description: |-
+    Research and analyze {input_data} related to {project_name}...
+  expected_output: |-
+    A detailed research report containing:
+    - Key findings
+    - Analysis results
+    - Recommendations
+  agent: researcher
+
+synthesis_task:
+  description: |-
+    Based on the research results, synthesize the findings...
+  expected_output: |-
+    A comprehensive synthesis report...
+  agent: synthesizer
+  context:
+    - research_task
+```
+
+## YAML 문법 규칙
+
+### 들여쓰기
+- 스페이스 2개 사용 (탭 사용 금지)
+- 일관된 들여쓰기 유지
+
+### 리스트 표기
+- 하이픈(`-`) 사용
+- 배열 요소는 하이픈 뒤에 스페이스 하나
+
+### 멀티라인 문자열
+- `|-` 사용하여 멀티라인 문자열 정의
+- 들여쓰기 유지
+
+### 주의사항
+- YAML 파일의 키 이름은 `crew.py`의 메서드 이름과 일치해야 함
+- 템플릿 변수는 `main.py`의 `inputs` 딕셔너리와 매칭되어야 함
+- `context` 배열의 Task 이름은 `tasks.yaml`의 키와 정확히 일치해야 함

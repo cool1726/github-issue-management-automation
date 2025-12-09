@@ -1,0 +1,123 @@
+monitor_issues:
+  description: |-
+    Monitor the GitHub repository {repository} for new issues.
+    Use the get_new_issues tool to fetch recent open issues that haven't been processed yet.
+    Provide a detailed summary of each new issue including:
+    - Issue number and title
+    - Full issue body/content
+    - Current labels (if any)
+    - Current assignees (if any)
+    - Creation date
+    - Issue URL
+    
+    Focus on issues that don't have labels or assignees yet, as these need processing.
+    Format the output clearly so that other agents can easily parse the issue information.
+  expected_output: |-
+    A detailed report listing all new issues found, including:
+    - Total number of new issues
+    - For each issue: number, title, body, labels, assignees, created_at, URL
+    - Issues that need processing (missing labels or assignees)
+    Format: Use clear section headers and bullet points for readability.
+  agent: issue_monitor
+
+label_issues:
+  description: |-
+    Analyze each new issue from the monitoring task and determine appropriate labels.
+    Based on the issue's title and body content, classify it as one or more of:
+    - bug: For bug reports, errors, crashes, unexpected behavior, or "not working" issues
+    - feature-request: For new feature requests, "add", "implement", "new feature" requests
+    - documentation: For documentation updates, improvements, clarifications, or "docs" related issues
+    - question: For questions, support requests, or "how to" inquiries
+    - enhancement: For improvements to existing features
+    
+    Analyze keywords and context carefully. An issue can have multiple labels if appropriate.
+    Use the add_label_to_issue tool to apply labels to each issue.
+    Provide clear reasoning for each label assignment based on the issue content.
+    Only label issues that don't already have labels, or add missing labels to partially labeled issues.
+  expected_output: |-
+    A report showing:
+    - Each issue analyzed (with issue number and title)
+    - Labels assigned to each issue with detailed reasoning
+    - Confirmation that labels were successfully applied via the tool
+    Format: Use clear section headers and bullet points.
+  agent: labeler
+  context:
+    - monitor_issues
+
+assign_issues:
+  description: |-
+    Based on the labeled issues and team member expertise information ({team_members}),
+    assign appropriate team members to each issue.
+    
+    Consider:
+    - Issue labels (bug, feature-request, documentation, etc.)
+    - Technical domain required (frontend, backend, DevOps, documentation, etc.)
+    - Issue content and keywords that indicate the domain (e.g., "UI", "API", "deploy", "docs")
+    - Team member expertise areas from {team_members}
+    - Issue complexity and workload distribution
+    
+    Match issues to experts:
+    - Frontend issues (UI, React, CSS, JavaScript, browser) → frontend team members
+    - Backend issues (API, database, server, Python, Node.js) → backend team members
+    - DevOps issues (deployment, CI/CD, infrastructure, Docker, Kubernetes) → DevOps team members
+    - Documentation issues → documentation team members
+    
+    Use the assign_issue tool to assign team members.
+    Only assign to issues that don't already have assignees, or add additional assignees if needed.
+    Provide clear reasoning for each assignment decision.
+  expected_output: |-
+    A report showing:
+    - Each issue that was assigned (with issue number and title)
+    - Team members assigned to each issue with detailed reasoning
+    - Confirmation that assignments were successfully made via the tool
+    Format: Use clear section headers and bullet points.
+  agent: assigner
+  context:
+    - monitor_issues
+    - label_issues
+
+assess_issues:
+  description: |-
+    Provide initial assessment comments for each new issue.
+    
+    For bug reports (labeled as "bug"):
+    - Analyze the issue description carefully
+    - If reproduction steps are missing, suggest clear numbered reproduction steps
+    - Identify potential root causes based on the description
+    - Recommend debugging approaches and investigation steps
+    - Format: Use markdown headers, code blocks, and bullet points
+    
+    For feature requests (labeled as "feature-request"):
+    - Evaluate the feature proposal and its value
+    - Provide implementation suggestions with technical considerations
+    - Discuss potential challenges and alternative approaches
+    - Suggest breaking down into smaller tasks if complex
+    - Format: Use markdown headers, code blocks, and bullet points
+    
+    For documentation issues (labeled as "documentation"):
+    - Identify what documentation is needed or missing
+    - Suggest documentation structure and organization
+    - Provide guidance on content and examples
+    - Suggest where the documentation should be located
+    - Format: Use markdown headers, code blocks, and bullet points
+    
+    For questions (labeled as "question"):
+    - Provide helpful answers or guidance
+    - Point to relevant documentation if available
+    - Suggest next steps
+    
+    Use the comment_on_issue tool to add assessment comments.
+    Format all comments using markdown for better readability.
+    Make comments professional, helpful, and actionable.
+  expected_output: |-
+    A report showing:
+    - Each issue that received an assessment comment (with issue number and title)
+    - Summary of the assessment provided for each issue
+    - Confirmation that comments were successfully added via the tool
+    Format: Use clear section headers and bullet points.
+  agent: assessor
+  context:
+    - monitor_issues
+    - label_issues
+    - assign_issues
+

@@ -1,0 +1,60 @@
+---
+alwaysApply: true
+---
+
+# LLM 설정
+
+## 기본 설정
+
+### 모델
+- Azure GPT-4.1 모델 사용
+- 모델 이름: `"azure/gpt-4.1"`
+
+### Temperature
+- 기본값: `0.7`
+- 일관성과 창의성의 균형을 위한 설정
+- 필요에 따라 조정 가능 (0.0 ~ 1.0)
+
+## LLM 인스턴스 생성
+
+### 기본 패턴
+```python
+from crewai import LLM
+
+llm = LLM(
+    model="azure/gpt-4.1",
+    temperature=0.7,
+)
+```
+
+### Agent에 적용
+- 각 Agent의 `llm` 파라미터에 LLM 인스턴스 전달
+- 예시:
+```python
+@agent
+def researcher(self) -> Agent:
+    return Agent(
+        config=self.agents_config["researcher"],
+        llm=LLM(
+            model="azure/gpt-4.1",
+            temperature=0.7,
+        ),
+        # ... 기타 설정
+    )
+```
+
+## 설정 고려사항
+
+### Temperature 조정
+- 낮은 값 (0.0 ~ 0.3): 더 일관되고 결정론적인 출력
+- 중간 값 (0.4 ~ 0.7): 균형잡힌 출력 (권장)
+- 높은 값 (0.8 ~ 1.0): 더 창의적이고 다양한 출력
+
+### 모델 변경
+- 다른 Azure 모델 사용 시 `model` 파라미터 변경
+- 모델 이름 형식: `"azure/model_name"`
+
+## 주의사항
+- Azure 관련 설정은 환경 변수에 구성되어 있어야 함
+- LLM 호출 비용을 고려하여 적절한 모델 선택
+- Agent별로 다른 LLM 설정 가능 (필요시)
